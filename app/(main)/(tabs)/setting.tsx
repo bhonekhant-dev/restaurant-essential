@@ -2,8 +2,10 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Ionicons} from "@expo/vector-icons";
+import {useRouter} from "expo-router";
 
 const Setting = () => {
+    const router = useRouter();
     const handlePress = (section: string) => {
         console.log(`${section} pressed`);
         // Navigate to the respective screen or open modal
@@ -25,7 +27,7 @@ const Setting = () => {
             </TouchableOpacity>
 
             {/* Menu Management */}
-            <TouchableOpacity style={styles.section} onPress={() => handlePress("Menu Management")}>
+            <TouchableOpacity style={styles.section} onPress={() => router.push("/manage-items")}>
                 <Text style={styles.sectionText}>Manage Categories & Items</Text>
                 <Ionicons name={'chevron-forward'} size={20} color="#ccc" />
             </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, {useState, useMemo, useEffect} from "react";
 import {
     View,
     Text,
@@ -14,6 +14,8 @@ import {
 import OrderItem from "@/components/OrderItem";
 import {Ionicons} from "@expo/vector-icons";
 import {useRouter} from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { useIsFocused } from "@react-navigation/core";
 
 const menu = {
     Appetizers: [
@@ -34,15 +36,17 @@ const menu = {
 };
 
 const Orders = () => {
+    const db = useSQLiteContext();
+    const isFocused = useIsFocused();
     const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
     const router = useRouter();
     const [showCategories, setShowCategories] = useState(false);
+    // The type for categories should be an array of objects
+    const [categories,setCategories] = useState<any[]>([]);
 
-    const categories = ["All", ...Object.keys(menu)];
     const [animation] = useState(new Animated.Value(0));
-
 
     const toggleCategories = () => {
         const toValue = showCategories ? 0 : 1;
@@ -59,7 +63,7 @@ const Orders = () => {
 
     const translateY = animation.interpolate({
         inputRange: [0, 1],
-        outputRange: [-20, 0] // Moves from hidden above to visible position
+        outputRange: [-20, 0]
     });
 
     const opacity = animation.interpolate({
@@ -107,6 +111,19 @@ const Orders = () => {
         />
     );
 
+    const fetchData = async () => {
+        // Fetch categories from the database
+        const dbCategories = await db.getAllAsync("SELECT * FROM categories");
+        // Add "All" to the list of categories.
+        // Make sure to add it as an object with a name property to be consistent.
+        const allCategory = { id: 0, name: "All" };
+        setCategories([allCategory, ...dbCategories]);
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, [isFocused]);
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView keyboardShouldPersistTaps="handled">
@@ -149,20 +166,20 @@ const Orders = () => {
                     >
                         {categories.map((cat) => (
                             <TouchableOpacity
-                                key={cat}
+                                key={cat.name} // Use a unique string from the object
                                 style={[
                                     styles.categoryButton,
-                                    selectedCategory === cat && styles.categoryButtonActive,
+                                    selectedCategory === cat.name && styles.categoryButtonActive,
                                 ]}
-                                onPress={() => setSelectedCategory(cat)}
+                                onPress={() => setSelectedCategory(cat.name)}
                             >
                                 <Text
                                     style={[
                                         styles.categoryText,
-                                        selectedCategory === cat && styles.categoryTextActive,
+                                        selectedCategory === cat.name && styles.categoryTextActive,
                                     ]}
                                 >
-                                    {cat}
+                                    {cat.name} {/* This is the key change */}
                                 </Text>
                             </TouchableOpacity>
                         ))}

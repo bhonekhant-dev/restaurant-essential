@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#122117",
         borderBottomWidth: 1,
         borderBottomColor: "#264533",
+        marginBottom: 12,
     },
     side: {
         width: 40, // same width as back button area for symmetry
